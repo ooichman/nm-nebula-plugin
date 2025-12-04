@@ -1,0 +1,13 @@
+[VPN Connection]
+
+Program NetworkManager launches to manage the connection
+
+program=/usr/libexec/nm-nebulavpn-service
+
+Unique D-Bus service name
+
+service=org.freedesktop.NetworkManager.vpn.nebula
+
+Shared library NetworkManager-gui (or nm-connection-editor) loads for configuration
+
+plugin=/usr/lib/NetworkManager/VPN/nm-nebulavpn-editor.so
