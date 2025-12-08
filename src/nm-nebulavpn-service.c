@@ -1,6 +1,6 @@
 #include <glib.h>
 #include <gio/gio.h>
-#include <libnm-util/nm-vpn-plugin.h>
+#include <libnm-util/nm-vpn-plugin.h> // REVERTED to standard path, relying on NM_UTIL_CFLAGS
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -8,9 +8,9 @@
 #include <errno.h>
 
 // --- Constants ---
-#define NEBULA_BINARY_PATH "/usr/bin/nebula" // MUST be installed here or in PATH
+#define NEBULA_BINARY_PATH "/usr/bin/nebula" 
 #define NEBULA_SERVICE_TYPE "nebula"
-#define TEMP_CONFIG_PATH "/tmp/nebula_nm_config_%d.yml" // Dynamic temp file
+#define TEMP_CONFIG_PATH "/tmp/nebula_nm_config_%d.yml"
 
 // Global state for the running process
 static GPid nebula_pid = 0;
@@ -22,9 +22,24 @@ static gchar *temp_config_file = NULL;
 static void
 report_failure(NMVpnPluginFailure reason, const char *log_message)
 {
+// [Image of Linux Kernel Architecture]
     g_warning("VPN connection failed: %s", log_message);
     nm_vpn_plugin_set_state(plugin, NM_VPN_PLUGIN_STATE_FAILURE);
     nm_vpn_plugin_set_failure(plugin, reason);
+}
+
+// Function to clean up the temporary config file
+static void
+cleanup_config_file()
+{
+    if (temp_config_file) {
+        if (g_file_test(temp_config_file, G_FILE_TEST_EXISTS)) {
+            g_message("Cleaning up temporary config file: %s", temp_config_file);
+            unlink(temp_config_file);
+        }
+        g_free(temp_config_file);
+        temp_config_file = NULL;
+    }
 }
 
 static void
@@ -34,14 +49,7 @@ child_watch_cb(GPid pid, int status, gpointer user_data)
         nebula_pid = 0;
         
         // Clean up the dynamically generated config file
-        if (temp_config_file) {
-            if (g_file_test(temp_config_file, G_FILE_TEST_EXISTS)) {
-                g_message("Cleaning up temporary config file: %s", temp_config_file);
-                unlink(temp_config_file);
-            }
-            g_free(temp_config_file);
-            temp_config_file = NULL;
-        }
+        cleanup_config_file();
 
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             g_message("Nebula process PID %d exited normally.", pid);
@@ -61,31 +69,36 @@ child_watch_cb(GPid pid, int status, gpointer user_data)
 static gboolean
 generate_nebula_config(GHashTable *connection, GError **error)
 {
-    GString *yaml;
-    const char *ca_crt, *host_crt, *host_key, *ip_address, *iface_name;
-    const char *lighthouses, *firewall_rules;
+    GString *yaml = g_string_new("");
     gchar **lighthouses_array = NULL;
     gchar **firewall_array = NULL;
     gboolean success = FALSE;
-    int fd;
-
+    
     // 1. Get all config items from the NM connection
-    ca_crt = g_hash_table_lookup(connection, "ca_crt");
-    host_crt = g_hash_table_lookup(connection, "host_crt");
-    host_key = g_hash_table_lookup(connection, "host_key");
-    ip_address = g_hash_table_lookup(connection, "ip_address");
-    iface_name = g_hash_table_lookup(connection, "interface_name");
-    lighthouses = g_hash_table_lookup(connection, "lighthouses");
-    firewall_rules = g_hash_table_lookup(connection, "firewall_rules");
+    const gchar *ca_crt = g_hash_table_lookup(connection, "ca_crt");
+    const gchar *host_crt = g_hash_table_lookup(connection, "host_crt");
+    const gchar *host_key = g_hash_table_lookup(connection, "host_key");
+    const gchar *ip_address = g_hash_table_lookup(connection, "ip_address");
+    const gchar *iface_name = g_hash_table_lookup(connection, "interface_name");
+    const gchar *lighthouses_raw = g_hash_table_lookup(connection, "lighthouses");
+    const gchar *firewall_rules_raw = g_hash_table_lookup(connection, "firewall_rules");
+
+    if (!ca_crt || !host_crt || !host_key || !ip_address || !iface_name) {
+         g_set_error(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, "Missing critical connection credentials.");
+         goto cleanup;
+    }
+
+    // Determine the IP address part without CIDR (e.g., 172.30.15.2)
+    gchar *ip_only = g_strndup(ip_address, strchr(ip_address, '/') - ip_address);
+    if (!ip_only) ip_only = g_strdup(ip_address); // Handle case where no CIDR is present
 
     // 2. Split multi-line entries
-    if (lighthouses)
-        lighthouses_array = g_strsplit(lighthouses, "\n", 0);
-    if (firewall_rules)
-        firewall_array = g_strsplit(firewall_rules, "\n", 0);
+    if (lighthouses_raw)
+        lighthouses_array = g_strsplit(lighthouses_raw, "\n", 0);
+    if (firewall_rules_raw)
+        firewall_array = g_strsplit(firewall_rules_raw, "\n", 0);
     
-    // 3. Start YAML generation
-    yaml = g_string_new("");
+    // --- YAML Construction ---
 
     // PKI Section
     g_string_append(yaml, "pki:\n");
@@ -93,90 +106,89 @@ generate_nebula_config(GHashTable *connection, GError **error)
     g_string_append_printf(yaml, "  cert: %s\n", host_crt);
     g_string_append_printf(yaml, "  key: %s\n\n", host_key);
 
-    // Lighthouse Section
-    g_string_append(yaml, "lighthouse:\n");
-    g_string_append(yaml, "  am_lighthouse: false\n\n"); // Always false for a client plugin
+    // Static Host Map Section
+    g_string_append(yaml, "static_host_map:\n");
+    if (lighthouses_array && lighthouses_array[0]) {
+        for (gchar **ptr = lighthouses_array; *ptr; ptr++) {
+            gchar *address = g_strstrip(g_strdup(*ptr));
+            if (address && address[0]) {
+                g_string_append_printf(yaml, "  \"%s\": [\"%s\"]\n", ip_only, address);
+            }
+            g_free(address);
+        }
+    } else {
+        g_string_append(yaml, "  # No static lighthouses configured\n");
+    }
+    g_string_append(yaml, "\n");
 
+    // Listen & Logging
+    g_string_append(yaml, "listen:\n  host: 0.0.0.0\n  port: 0\n\n");
+    g_string_append(yaml, "logging:\n  level: info\n  format: text\n\n");
+    
     // TUN Section
     g_string_append(yaml, "tun:\n");
     g_string_append(yaml, "  disabled: false\n");
     g_string_append_printf(yaml, "  dev: %s\n", iface_name);
     g_string_append(yaml, "  mtu: 1400\n");
     g_string_append_printf(yaml, "  listen_address: %s\n", ip_address);
-
-    // Static Host Map (required for initial lighthouse discovery)
-    g_string_append(yaml, "static_host_map:\n");
+    
+    // Lighthouse Host List
+    g_string_append(yaml, "  lighthouse:\n");
+    g_string_append(yaml, "    am_lighthouse: false\n"); 
+    g_string_append(yaml, "    hosts:\n");
     if (lighthouses_array && lighthouses_array[0]) {
         for (gchar **ptr = lighthouses_array; *ptr; ptr++) {
             gchar *address = g_strstrip(g_strdup(*ptr));
-            if (address[0]) {
-                // The IP address part of ip_address (e.g., 172.30.15.2/24 -> 172.30.15.2)
-                gchar *ip_only = g_strndup(ip_address, strchr(ip_address, '/') - ip_address);
-                g_string_append_printf(yaml, "  \"%s\": [\"%s\"]\n", ip_only, address);
-                g_free(ip_only);
+            if (address && address[0]) {
+                g_string_append_printf(yaml, "      - %s\n", address);
             }
             g_free(address);
         }
-    } else {
-        g_string_append(yaml, "  \"0.0.0.0\": [] # Placeholder\n");
     }
+    g_string_append(yaml, "\n");
 
-    // Lighthouse Hosts
-    g_string_append(yaml, "  hosts:\n");
-    if (lighthouses_array && lighthouses_array[0]) {
-        for (gchar **ptr = lighthouses_array; *ptr; ptr++) {
-            gchar *address = g_strstrip(g_strdup(*ptr));
-            if (address[0])
-                g_string_append_printf(yaml, "    - %s\n", address);
-            g_free(address);
-        }
-    }
-
-    // Logging/Listen (using standard defaults)
-    g_string_append(yaml, "\nlisten:\n  host: 0.0.0.0\n  port: 0\n");
-    g_string_append(yaml, "\nlogging:\n  level: info\n  format: text\n");
-    
     // Firewall Section
-    g_string_append(yaml, "\nfirewall:\n");
+    g_string_append(yaml, "firewall:\n");
     g_string_append(yaml, "  default_local_cidr_any: true\n");
     g_string_append(yaml, "  conntrack:\n    tcp_timeout: 12m\n    udp_timeout: 3m\n    default_timeout: 10m\n    max_connections: 100000\n");
     
-    // Firewall Rules parsing
+    g_string_append(yaml, "\n  outbound:\n");
+    
+    // Process Firewall Rules
+    gboolean inbound_section_added = FALSE;
+
     if (firewall_array && firewall_array[0]) {
-        g_string_append(yaml, "\n  outbound:\n");
         for (gchar **ptr = firewall_array; *ptr; ptr++) {
             gchar *line = g_strstrip(g_strdup(*ptr));
             gchar **fields;
             if (line[0]) {
-                // Expects: Type, Proto, Port, RemoteHost/Group
                 fields = g_strsplit(line, ",", 4);
                 if (fields[0] && fields[1] && fields[2] && fields[3]) {
-                    gchar *type = g_strstrip(fields[0]);
-                    gchar *proto = g_strstrip(fields[1]);
-                    gchar *port = g_strstrip(fields[2]);
-                    gchar *host = g_strstrip(fields[3]);
+                    gchar *type = g_strstrip(g_strdup(fields[0]));
+                    gchar *proto = g_strstrip(g_strdup(fields[1]));
+                    gchar *port = g_strstrip(g_strdup(fields[2]));
+                    gchar *host = g_strstrip(g_strdup(fields[3]));
 
-                    if (g_str_equal(type, "outbound")) {
-                        // We assume inbound section is written below.
-                    } else if (g_str_equal(type, "inbound")) {
-                        // Split point for inbound rules
-                        if (ptr == firewall_array || !g_str_equal(g_strstrip(g_strsplit(g_strstrip(*(ptr-1)), ",", 4)[0]), "outbound")) {
-                            g_string_append(yaml, "\n  inbound:\n");
-                        }
+                    if (g_str_equal(type, "inbound") && !inbound_section_added) {
+                        g_string_append(yaml, "\n  inbound:\n");
+                        inbound_section_added = TRUE;
                     }
-
-                    g_string_append(yaml, "    - port: ");
-                    g_string_append(yaml, port);
-                    g_string_append(yaml, "\n");
                     
-                    g_string_append(yaml, "      proto: ");
-                    g_string_append(yaml, proto);
-                    g_string_append(yaml, "\n");
+                    GString *target_yaml = g_string_new("");
                     
-                    g_string_append(yaml, "      host: ");
-                    g_string_append(yaml, host);
-                    g_string_append(yaml, "\n");
-
+                    g_string_append_printf(target_yaml, "    - port: %s\n", port);
+                    g_string_append_printf(target_yaml, "      proto: %s\n", proto);
+                    g_string_append_printf(target_yaml, "      host: %s\n", host);
+                    
+                    if (g_str_equal(type, "outbound")) {
+                         // Must be appended to outbound section which is currently open
+                         g_string_append(yaml, target_yaml->str);
+                    } else if (g_str_equal(type, "inbound")) {
+                         // Must be appended to inbound section which is currently open
+                         g_string_append(yaml, target_yaml->str);
+                    }
+                    
+                    g_string_free(target_yaml, TRUE);
                     g_free(type); g_free(proto); g_free(port); g_free(host);
                 } else {
                     g_warning("Skipping invalid firewall rule line: %s", line);
@@ -186,9 +198,10 @@ generate_nebula_config(GHashTable *connection, GError **error)
             g_free(line);
         }
     } else {
-        // Fallback to allow all as per the user's sample config
-        g_string_append(yaml, "  outbound:\n    - port: any\n      proto: any\n      host: any\n");
-        g_string_append(yaml, "  inbound:\n    - port: any\n      proto: any\n      host: any\n");
+        // Default rules if user left the field blank
+        g_string_append(yaml, "    - port: any\n      proto: any\n      host: any\n");
+        g_string_append(yaml, "\n  inbound:\n");
+        g_string_append(yaml, "    - port: any\n      proto: any\n      host: any\n");
     }
 
     // 4. Write the YAML content to a temporary file
@@ -206,6 +219,7 @@ cleanup:
     g_string_free(yaml, TRUE);
     g_strfreev(lighthouses_array);
     g_strfreev(firewall_array);
+    g_free(ip_only);
     return success;
 }
 
@@ -218,6 +232,8 @@ handle_connect(NMVpnPlugin *vpn_plugin,
 {
     const GPtrArray *args;
     GError *lerror = NULL;
+    const gchar *ip_address;
+    gchar *ip_only = NULL;
 
     plugin = vpn_plugin;
     
@@ -225,6 +241,11 @@ handle_connect(NMVpnPlugin *vpn_plugin,
     if (!generate_nebula_config(connection, error)) {
         return FALSE;
     }
+    
+    // Get IP address details for L3 reporting
+    ip_address = g_hash_table_lookup(connection, "ip_address");
+    ip_only = g_strndup(ip_address, strchr(ip_address, '/') - ip_address);
+    if (!ip_only) ip_only = g_strdup(ip_address); 
 
     // 2. Prepare arguments for the 'nebula' executable
     args = g_ptr_array_new();
@@ -248,10 +269,7 @@ handle_connect(NMVpnPlugin *vpn_plugin,
     {
         report_failure(NM_VPN_PLUGIN_FAILURE_START_FAILED, g_strdup_printf("Failed to spawn Nebula: %s", lerror->message));
         g_error_free(lerror);
-        // Clean up temp file immediately on failure to spawn
-        unlink(temp_config_file); 
-        g_free(temp_config_file);
-        temp_config_file = NULL;
+        cleanup_config_file();
         goto cleanup;
     }
 
@@ -259,22 +277,17 @@ handle_connect(NMVpnPlugin *vpn_plugin,
     g_child_watch_add(G_PRIORITY_DEFAULT, nebula_pid, child_watch_cb, NULL);
 
     // 5. Report L3 configuration to NetworkManager
-    // NOTE: For Nebula, the tunnel device 'nbl1' is created by Nebula itself. 
-    // NetworkManager needs the L3 configuration (IP/Routes/DNS) to be pushed to it.
-    // In a production plugin, you would read the output/logs of the Nebula process 
-    // or probe the 'nbl1' interface to get the real assigned IP/DNS.
-    // Here we hardcode a plausible setup derived from the user's config:
     GHashTable *config = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     
-    // The IP address is read from the user input (e.g., 172.30.15.2/24)
-    gchar *ip_addr = g_strndup(g_hash_table_lookup(connection, "ip_address"), strchr(g_hash_table_lookup(connection, "ip_address"), '/') - g_hash_table_lookup(connection, "ip_address"));
-    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_ADDRESS), ip_addr);
-    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_PREFIX), g_strdup("24")); 
+    // IP address is read from the user input (e.g., 172.30.15.2/24)
+    gchar *cidr_suffix = strchr(ip_address, '/');
+    gchar *prefix = g_strdup(cidr_suffix ? cidr_suffix + 1 : "32");
+    
+    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_ADDRESS), ip_only);
+    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_PREFIX), prefix); 
     
     // Set a plausible Gateway (often the .1 of the subnet for overlay)
     g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_GATEWAY), g_strdup("172.30.15.1"));
-    
-    // Add a simple DNS server (optional)
     g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_DNS), g_strdup("8.8.8.8"));
     
     nm_vpn_plugin_set_ip4_config(plugin, config);
@@ -286,6 +299,7 @@ handle_connect(NMVpnPlugin *vpn_plugin,
 
 cleanup:
     g_ptr_array_free(args, TRUE);
+    g_free(ip_only);
     if (lerror) {
         g_propagate_error(error, lerror);
         return FALSE;
@@ -307,6 +321,7 @@ handle_disconnect(NMVpnPlugin *vpn_plugin)
         // child_watch_cb will handle cleanup and state change
     } else {
         g_message("No active Nebula process to disconnect.");
+        cleanup_config_file();
         nm_vpn_plugin_set_state(plugin, NM_VPN_PLUGIN_STATE_DISCONNECTED);
     }
 }

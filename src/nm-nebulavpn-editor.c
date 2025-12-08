@@ -11,12 +11,12 @@
 
 typedef struct {
     GtkWidget *main_widget;
-    // Identity Tab
+    // Identity Tab Fields
     GtkEntry *cert_path_entry;
     GtkEntry *key_path_entry;
     GtkEntry *ip_address_entry;
     
-    // Config Tab
+    // Config Tab Fields
     GtkEntry *iface_name_entry;
     GtkEntry *ca_path_entry;
     GtkTextView *lighthouse_view;
@@ -26,7 +26,7 @@ typedef struct {
 
 } NebulaVpnEditor;
 
-// Helper to create a file chooser button
+// Helper to create a file chooser button (simplified)
 static GtkWidget *create_file_chooser_button(GtkEntry **entry)
 {
     GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
@@ -35,14 +35,9 @@ static GtkWidget *create_file_chooser_button(GtkEntry **entry)
     
     *entry = GTK_ENTRY(file_entry);
 
-    g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_file_chooser_dialog_new), NULL);
-    g_signal_connect(button, "clicked", G_CALLBACK(gtk_widget_destroy), NULL); // Basic placeholder action
-    
     gtk_box_pack_start(GTK_BOX(hbox), file_entry, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
     
-    // In a real plugin, the button would launch a GtkFileChooserDialog 
-    // and set the path in the entry. We skip the dialog implementation for brevity.
     return hbox;
 }
 
@@ -53,26 +48,35 @@ static GtkWidget *create_identity_page(NebulaVpnEditor *editor)
     gtk_grid_set_column_spacing(GTK_GRID(grid), 12);
     gtk_container_set_border_width(GTK_CONTAINER(grid), 12);
 
+    // Helper for attaching labels
+    #define ATTACH_LABEL(text, row) \
+        do { \
+            GtkWidget *label = gtk_label_new(_(text)); \
+            gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5); \
+            gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1); \
+        } while (0)
+
     // Host Certificate Path
     GtkWidget *cert_hbox = create_file_chooser_button(&editor->cert_path_entry);
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new(_("Client Certificate Path (.crt):")), 0, 0, 1, 1);
+    ATTACH_LABEL("Client Certificate Path (.crt):", 0);
     gtk_grid_attach(GTK_GRID(grid), cert_hbox, 1, 0, 1, 1);
 
     // Host Key Path
     GtkWidget *key_hbox = create_file_chooser_button(&editor->key_path_entry);
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new(_("Host Private Key Path (.key):")), 0, 1, 1, 1);
+    ATTACH_LABEL("Host Private Key Path (.key):", 1);
     gtk_grid_attach(GTK_GRID(grid), key_hbox, 1, 1, 1, 1);
 
     // CA Certificate Path 
     GtkWidget *ca_hbox = create_file_chooser_button(&editor->ca_path_entry);
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new(_("CA Certificate Path (.crt):")), 0, 2, 1, 1);
+    ATTACH_LABEL("CA Certificate Path (.crt):", 2);
     gtk_grid_attach(GTK_GRID(grid), ca_hbox, 1, 2, 1, 1);
 
     // Client VPN IP Address (e.g., 172.30.15.2/24)
     editor->ip_address_entry = GTK_ENTRY(gtk_entry_new());
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new(_("Client VPN IP/CIDR (e.g., 172.30.15.2/24):")), 0, 3, 1, 1);
+    ATTACH_LABEL("Client VPN IP/CIDR (e.g., 172.30.15.2/24):", 3);
     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(editor->ip_address_entry), 1, 3, 1, 1);
     
+    #undef ATTACH_LABEL
     return grid;
 }
 
@@ -106,7 +110,6 @@ static void on_firewall_button_clicked(GtkButton *button, NebulaVpnEditor *edito
 
     gtk_widget_show_all(content_area);
 
-    // Run the dialog (it will block until closed)
     gtk_dialog_run(GTK_DIALOG(dialog));
     
     // Hide the GtkTextView again, as it's owned by the editor struct
@@ -129,17 +132,23 @@ static GtkWidget *create_config_page(NebulaVpnEditor *editor)
 
     editor->iface_name_entry = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(editor->iface_name_entry, "nbl1");
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new(_("Interface Name (tun.dev):")), 0, 0, 1, 1);
+    
+    GtkWidget *label_iface = gtk_label_new(_("Interface Name (tun.dev):"));
+    gtk_misc_set_alignment(GTK_MISC(label_iface), 0.0, 0.5);
+    gtk_grid_attach(GTK_GRID(grid), label_iface, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(editor->iface_name_entry), 1, 0, 1, 1);
     gtk_box_pack_start(GTK_BOX(vbox), grid, FALSE, FALSE, 0);
 
-    // --- Lighthouses (3 lines max) ---
+    // --- Lighthouses (Multi-line input) ---
     GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
     editor->lighthouse_view = GTK_TEXT_VIEW(gtk_text_view_new());
     gtk_text_view_set_wrap_mode(editor->lighthouse_view, GTK_WRAP_NONE);
     gtk_text_view_set_placeholder_text(editor->lighthouse_view, _("Enter Lighthouse addresses (Host:Port), one per line, e.g.,\n172.30.15.1:4242\nsecond.lighthouse.com:4242"));
     gtk_container_add(GTK_CONTAINER(scroll), GTK_WIDGET(editor->lighthouse_view));
-    gtk_box_pack_start(GTK_BOX(vbox), gtk_label_new(_("Lighthouses (static_host_map/hosts):")), FALSE, FALSE, 0);
+    
+    GtkWidget *label_lh = gtk_label_new(_("Lighthouses (static_host_map/hosts):"));
+    gtk_misc_set_alignment(GTK_MISC(label_lh), 0.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), label_lh, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
 
     // --- Firewall Rules Button ---
@@ -154,6 +163,10 @@ static GtkWidget *create_config_page(NebulaVpnEditor *editor)
 
     GtkWidget *fw_button = gtk_button_new_with_label(_("Configure Firewall Rules..."));
     g_signal_connect(fw_button, "clicked", G_CALLBACK(on_firewall_button_clicked), editor);
+    
+    GtkWidget *label_fw = gtk_label_new(_("Firewall Rules:"));
+    gtk_misc_set_alignment(GTK_MISC(label_fw), 0.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), label_fw, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), fw_button, FALSE, FALSE, 0);
 
     return vbox;
@@ -215,7 +228,6 @@ nm_nebulavpn_editor_save(GtkWidget *widget, NMConnection *connection)
     gtk_text_buffer_get_end_iter(buffer, &end);
     lighthouses = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 
-    // The firewall rules are retrieved directly from the buffer, regardless of the dialog state
     buffer = gtk_text_view_get_buffer(editor->firewall_view);
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
