@@ -2784,6 +2784,10 @@ m4trace:configure.ac:6: -1- m4_pattern_allow([^am__fastdepCC_TRUE$])
 m4trace:configure.ac:6: -1- m4_pattern_allow([^am__fastdepCC_FALSE$])
 m4trace:configure.ac:6: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_TRUE])
 m4trace:configure.ac:6: -1- _AM_SUBST_NOTMAKE([am__fastdepCC_FALSE])
+m4trace:configure.ac:8: -1- AC_PROG_LIBTOOL
+m4trace:configure.ac:8: -1- _m4_warn([obsolete], [The macro 'AC_PROG_LIBTOOL' is obsolete.
+You should run autoupdate.], [m4/libtool.m4:100: AC_PROG_LIBTOOL is expanded from...
+configure.ac:8: the top level])
 m4trace:configure.ac:8: -1- LT_INIT
 m4trace:configure.ac:8: -1- m4_pattern_forbid([^_?LT_[A-Z_]+$])
 m4trace:configure.ac:8: -1- m4_pattern_allow([^(_LT_EOF|LT_DLGLOBAL|LT_DLLAZY_OR_NOW|LT_MULTI_MODULE)$])
@@ -2887,58 +2891,67 @@ m4trace:configure.ac:8: -1- m4_pattern_allow([^HAVE_DLFCN_H$])
 m4trace:configure.ac:9: -1- LT_INIT
 m4trace:configure.ac:11: -1- m4_pattern_allow([^VERSION$])
 m4trace:configure.ac:17: -1- m4_pattern_allow([^nmvpn_plugin_dir$])
-m4trace:configure.ac:19: -1- PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.40.0], [], [AC_MSG_ERROR([Package requirements (glib-2.0) were not met. Install glib2-devel.])])
-m4trace:configure.ac:19: -1- PKG_PROG_PKG_CONFIG
-m4trace:configure.ac:19: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^PKG_CONFIG$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^GLIB_CFLAGS$])
-m4trace:configure.ac:19: -1- m4_pattern_allow([^GLIB_LIBS$])
-m4trace:configure.ac:19: -1- PKG_CHECK_EXISTS([glib-2.0 >= 2.40.0], [pkg_cv_[]GLIB_CFLAGS=`$PKG_CONFIG --[]cflags "glib-2.0 >= 2.40.0" 2>/dev/null`
+m4trace:configure.ac:20: -1- PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.64])
+m4trace:configure.ac:20: -1- PKG_PROG_PKG_CONFIG
+m4trace:configure.ac:20: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG_PATH$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG_LIBDIR$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^PKG_CONFIG$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^GLIB_CFLAGS$])
+m4trace:configure.ac:20: -1- m4_pattern_allow([^GLIB_LIBS$])
+m4trace:configure.ac:20: -1- PKG_CHECK_EXISTS([glib-2.0 >= 2.64], [pkg_cv_[]GLIB_CFLAGS=`$PKG_CONFIG --[]cflags "glib-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:19: -1- PKG_CHECK_EXISTS([glib-2.0 >= 2.40.0], [pkg_cv_[]GLIB_LIBS=`$PKG_CONFIG --[]libs "glib-2.0 >= 2.40.0" 2>/dev/null`
+m4trace:configure.ac:20: -1- PKG_CHECK_EXISTS([glib-2.0 >= 2.64], [pkg_cv_[]GLIB_LIBS=`$PKG_CONFIG --[]libs "glib-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:19: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:21: -1- PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.40.0])
+m4trace:configure.ac:20: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:21: -1- PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.64])
 m4trace:configure.ac:21: -1- m4_pattern_allow([^GIO_CFLAGS$])
 m4trace:configure.ac:21: -1- m4_pattern_allow([^GIO_LIBS$])
-m4trace:configure.ac:21: -1- PKG_CHECK_EXISTS([gio-2.0 >= 2.40.0], [pkg_cv_[]GIO_CFLAGS=`$PKG_CONFIG --[]cflags "gio-2.0 >= 2.40.0" 2>/dev/null`
+m4trace:configure.ac:21: -1- PKG_CHECK_EXISTS([gio-2.0 >= 2.64], [pkg_cv_[]GIO_CFLAGS=`$PKG_CONFIG --[]cflags "gio-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:21: -1- PKG_CHECK_EXISTS([gio-2.0 >= 2.40.0], [pkg_cv_[]GIO_LIBS=`$PKG_CONFIG --[]libs "gio-2.0 >= 2.40.0" 2>/dev/null`
+m4trace:configure.ac:21: -1- PKG_CHECK_EXISTS([gio-2.0 >= 2.64], [pkg_cv_[]GIO_LIBS=`$PKG_CONFIG --[]libs "gio-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
 m4trace:configure.ac:21: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:22: -1- PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.20.0])
+m4trace:configure.ac:22: -1- PKG_CHECK_MODULES([GTK], [gtk4 >= 4.0.0], [], [AC_MSG_ERROR([Package requirements (gtk4) were not met. Install gtk4-devel.])])
 m4trace:configure.ac:22: -1- m4_pattern_allow([^GTK_CFLAGS$])
 m4trace:configure.ac:22: -1- m4_pattern_allow([^GTK_LIBS$])
-m4trace:configure.ac:22: -1- PKG_CHECK_EXISTS([gtk+-3.0 >= 3.20.0], [pkg_cv_[]GTK_CFLAGS=`$PKG_CONFIG --[]cflags "gtk+-3.0 >= 3.20.0" 2>/dev/null`
+m4trace:configure.ac:22: -1- PKG_CHECK_EXISTS([gtk4 >= 4.0.0], [pkg_cv_[]GTK_CFLAGS=`$PKG_CONFIG --[]cflags "gtk4 >= 4.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:22: -1- PKG_CHECK_EXISTS([gtk+-3.0 >= 3.20.0], [pkg_cv_[]GTK_LIBS=`$PKG_CONFIG --[]libs "gtk+-3.0 >= 3.20.0" 2>/dev/null`
+m4trace:configure.ac:22: -1- PKG_CHECK_EXISTS([gtk4 >= 4.0.0], [pkg_cv_[]GTK_LIBS=`$PKG_CONFIG --[]libs "gtk4 >= 4.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
 m4trace:configure.ac:22: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:24: -1- PKG_CHECK_MODULES([NM], [libnm >= 1.2.0], [], [AC_MSG_ERROR([Package requirements (libnm >= 1.2.0) were not met. Install NetworkManager-libnm-devel.])])
-m4trace:configure.ac:24: -1- m4_pattern_allow([^NM_CFLAGS$])
-m4trace:configure.ac:24: -1- m4_pattern_allow([^NM_LIBS$])
-m4trace:configure.ac:24: -1- PKG_CHECK_EXISTS([libnm >= 1.2.0], [pkg_cv_[]NM_CFLAGS=`$PKG_CONFIG --[]cflags "libnm >= 1.2.0" 2>/dev/null`
+m4trace:configure.ac:25: -1- PKG_CHECK_MODULES([NM], [libnm >= 1.50.3], [], [AC_MSG_ERROR([Package requirements (libnm >= 1.50.3) were not met. Install NetworkManager-libnm-devel.])])
+m4trace:configure.ac:25: -1- m4_pattern_allow([^NM_CFLAGS$])
+m4trace:configure.ac:25: -1- m4_pattern_allow([^NM_LIBS$])
+m4trace:configure.ac:25: -1- PKG_CHECK_EXISTS([libnm >= 1.50.3], [pkg_cv_[]NM_CFLAGS=`$PKG_CONFIG --[]cflags "libnm >= 1.50.3" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:24: -1- PKG_CHECK_EXISTS([libnm >= 1.2.0], [pkg_cv_[]NM_LIBS=`$PKG_CONFIG --[]libs "libnm >= 1.2.0" 2>/dev/null`
+m4trace:configure.ac:25: -1- PKG_CHECK_EXISTS([libnm >= 1.50.3], [pkg_cv_[]NM_LIBS=`$PKG_CONFIG --[]libs "libnm >= 1.50.3" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:24: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:29: -1- m4_pattern_allow([^NM_UTIL_CFLAGS$])
-m4trace:configure.ac:30: -1- m4_pattern_allow([^NM_UTIL_LIBS$])
-m4trace:configure.ac:33: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.ac:33: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:33: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
-m4trace:configure.ac:33: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
-m4trace:configure.ac:33: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
-m4trace:configure.ac:33: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
-m4trace:configure.ac:33: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
-m4trace:configure.ac:33: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
-m4trace:configure.ac:33: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
-m4trace:configure.ac:33: -1- AM_RUN_LOG([cd "$am_dirpart" \
+m4trace:configure.ac:25: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:31: -1- m4_pattern_allow([^NM_UTIL_CFLAGS$])
+m4trace:configure.ac:32: -1- m4_pattern_allow([^NM_UTIL_LIBS$])
+m4trace:configure.ac:34: -1- PKG_CHECK_MODULES([NM_UI], [libnma >= 1.10.6], [], [AC_MSG_ERROR([Package requirements (libnma >= 1.10.6) were not met. Install libnma-devel.])])
+m4trace:configure.ac:34: -1- m4_pattern_allow([^NM_UI_CFLAGS$])
+m4trace:configure.ac:34: -1- m4_pattern_allow([^NM_UI_LIBS$])
+m4trace:configure.ac:34: -1- PKG_CHECK_EXISTS([libnma >= 1.10.6], [pkg_cv_[]NM_UI_CFLAGS=`$PKG_CONFIG --[]cflags "libnma >= 1.10.6" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:34: -1- PKG_CHECK_EXISTS([libnma >= 1.10.6], [pkg_cv_[]NM_UI_LIBS=`$PKG_CONFIG --[]libs "libnma >= 1.10.6" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:34: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:38: -1- m4_pattern_allow([^NM_VPN_CFLAGS$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:41: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:41: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:41: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:41: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:41: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
+m4trace:configure.ac:41: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:41: -1- AM_RUN_LOG([cd "$am_dirpart" \
       && sed -e '/# am--include-marker/d' "$am_filepart" \
         | $MAKE -f - am--depfiles])
-m4trace:configure.ac:33: -1- _LT_PROG_LTMAIN
+m4trace:configure.ac:41: -1- _LT_PROG_LTMAIN

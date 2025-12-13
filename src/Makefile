@@ -136,7 +136,8 @@ am__uninstall_files_from_dir = { \
 LTLIBRARIES = $(nm_vpn_plugin_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 nm_nebulavpn_editor_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_nm_nebulavpn_editor_la_OBJECTS =  \
 	nm_nebulavpn_editor_la-nm-nebulavpn-editor.lo
 nm_nebulavpn_editor_la_OBJECTS = $(am_nm_nebulavpn_editor_la_OBJECTS)
@@ -152,7 +153,8 @@ am_nm_nebulavpn_service_OBJECTS =  \
 	nm_nebulavpn_service-nm-nebulavpn-service.$(OBJEXT)
 nm_nebulavpn_service_OBJECTS = $(am_nm_nebulavpn_service_OBJECTS)
 nm_nebulavpn_service_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 nm_nebulavpn_service_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(nm_nebulavpn_service_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
@@ -255,8 +257,8 @@ GIO_LIBS = -lgio-2.0 -lgobject-2.0 -lglib-2.0
 GLIB_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/sysprof-6 -pthread
 GLIB_LIBS = -lglib-2.0
 GREP = /usr/bin/grep
-GTK_CFLAGS = -I/usr/include/gtk-3.0 -I/usr/include/pango-1.0 -I/usr/include/cloudproviders -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/webp -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/atk-1.0 -I/usr/include/dbus-1.0 -I/usr/lib64/dbus-1.0/include -I/usr/include/fribidi -I/usr/include/libxml2 -I/usr/include/pixman-1 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/gio-unix-2.0 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -DWITH_GZFILEOP -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
-GTK_LIBS = -lgtk-3 -lgdk-3 -lz -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
+GTK_CFLAGS = -I/usr/include/gtk-4.0 -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/harfbuzz -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/webp -I/usr/include/cairo -I/usr/include/libxml2 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/pixman-1 -I/usr/include/graphene-1.0 -I/usr/lib64/graphene-1.0/include -mfpmath=sse -msse -msse2 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -DWITH_GZFILEOP -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
+GTK_LIBS = -lgtk-4 -lpangocairo-1.0 -lpango-1.0 -lharfbuzz -lgdk_pixbuf-2.0 -lcairo-gobject -lcairo -lvulkan -lgraphene-1.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -278,8 +280,11 @@ NM = /usr/bin/nm -B
 NMEDIT = 
 NM_CFLAGS = -I/usr/include/libnm -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -DWITH_GZFILEOP -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
 NM_LIBS = -lnm -lgio-2.0 -lgobject-2.0 -lglib-2.0
+NM_UI_CFLAGS = -I/usr/include/libnma -I/usr/include/libnm -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -DWITH_GZFILEOP -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
+NM_UI_LIBS = -lnma -lnm -lgio-2.0 -lgobject-2.0 -lglib-2.0
 NM_UTIL_CFLAGS = -I/usr/include/libnm -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -DWITH_GZFILEOP -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/sysprof-6 -pthread
 NM_UTIL_LIBS = -lnm -lgio-2.0 -lgobject-2.0 -lglib-2.0
+NM_VPN_CFLAGS = -I/usr/include/libnm
 OBJDUMP = objdump
 OBJEXT = o
 OTOOL = 
@@ -356,14 +361,14 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 nm_nebulavpn_service_SOURCES = nm-nebulavpn-service.c
-nm_nebulavpn_service_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(NM_CFLAGS) $(NM_UTIL_CFLAGS) -I/usr/include/NetworkManager
-nm_nebulavpn_service_LDADD = $(GLIB_LIBS) $(GIO_LIBS) $(NM_UTIL_LIBS)
+nm_nebulavpn_service_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(NM_CFLAGS) $(NM_UTIL_CFLAGS) $(NM_VPN_CFLAGS)
+nm_nebulavpn_service_LDADD = $(GLIB_LIBS) $(GIO_LIBS) $(NM_LIBS) $(NM_UTIL_LIBS)
 nm_vpn_plugindir = $(nmvpn_plugin_dir)
 nm_vpn_plugin_LTLIBRARIES = nm-nebulavpn-editor.la
 nm_nebulavpn_editor_la_SOURCES = nm-nebulavpn-editor.c
-nm_nebulavpn_editor_la_CFLAGS = $(GTK_CFLAGS) $(NM_CFLAGS) $(NM_UTIL_CFLAGS) -I/usr/include/NetworkManager
+nm_nebulavpn_editor_la_CFLAGS = $(GTK_CFLAGS) $(NM_UTIL_CFLAGS) $(NM_UI_CFLAGS) $(NM_VPN_CFLAGS)
 nm_nebulavpn_editor_la_LDFLAGS = -module -avoid-version
-nm_nebulavpn_editor_la_LIBADD = $(GTK_LIBS) $(NM_LIBS) $(NM_UTIL_LIBS)
+nm_nebulavpn_editor_la_LIBADD = $(GTK_LIBS) $(NM_UTIL_LIBS) $(NM_UI_LIBS) $(NM_LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -771,6 +776,8 @@ uninstall-am: uninstall-libexecPROGRAMS \
 
 .PRECIOUS: Makefile
 
+
+CFLAGS for service: Includes standard GLib/GIO, NM, and explicit path fix
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
