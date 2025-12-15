@@ -656,6 +656,9 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+NM_VPN_CFLAGS
+NM_UI_LIBS
+NM_UI_CFLAGS
 NM_UTIL_LIBS
 NM_UTIL_CFLAGS
 NM_LIBS
@@ -821,7 +824,9 @@ GIO_LIBS
 GTK_CFLAGS
 GTK_LIBS
 NM_CFLAGS
-NM_LIBS'
+NM_LIBS
+NM_UI_CFLAGS
+NM_UI_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1498,6 +1503,9 @@ Some influential environment variables:
   GTK_LIBS    linker flags for GTK, overriding pkg-config
   NM_CFLAGS   C compiler flags for NM, overriding pkg-config
   NM_LIBS     linker flags for NM, overriding pkg-config
+  NM_UI_CFLAGS
+              C compiler flags for NM_UI, overriding pkg-config
+  NM_UI_LIBS  linker flags for NM_UI, overriding pkg-config
 
 Use these variables to override the choices made by 'configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -12793,6 +12801,7 @@ fi
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -12923,19 +12932,19 @@ if test -z "$PKG_CONFIG"; then
 fi
 
 pkg_failed=no
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for glib-2.0 >= 2.40.0" >&5
-printf %s "checking for glib-2.0 >= 2.40.0... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for glib-2.0 >= 2.64" >&5
+printf %s "checking for glib-2.0 >= 2.64... " >&6; }
 
 if test -n "$GLIB_CFLAGS"; then
     pkg_cv_GLIB_CFLAGS="$GLIB_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.40.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.40.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.64\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.64") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GLIB_CFLAGS=`$PKG_CONFIG --cflags "glib-2.0 >= 2.40.0" 2>/dev/null`
+  pkg_cv_GLIB_CFLAGS=`$PKG_CONFIG --cflags "glib-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -12947,12 +12956,12 @@ if test -n "$GLIB_LIBS"; then
     pkg_cv_GLIB_LIBS="$GLIB_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.40.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.40.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.64\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.64") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GLIB_LIBS=`$PKG_CONFIG --libs "glib-2.0 >= 2.40.0" 2>/dev/null`
+  pkg_cv_GLIB_LIBS=`$PKG_CONFIG --libs "glib-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -12973,18 +12982,38 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-                GLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "glib-2.0 >= 2.40.0" 2>&1`
+                GLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "glib-2.0 >= 2.64" 2>&1`
         else
-                GLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "glib-2.0 >= 2.40.0" 2>&1`
+                GLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "glib-2.0 >= 2.64" 2>&1`
         fi
         # Put the nasty error message in config.log where it belongs
         echo "$GLIB_PKG_ERRORS" >&5
 
-        as_fn_error $? "Package requirements (glib-2.0) were not met. Install glib2-devel." "$LINENO" 5
+        as_fn_error $? "Package requirements (glib-2.0 >= 2.64) were not met:
+
+$GLIB_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables GLIB_CFLAGS
+and GLIB_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
 elif test $pkg_failed = untried; then
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-        as_fn_error $? "Package requirements (glib-2.0) were not met. Install glib2-devel." "$LINENO" 5
+        { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables GLIB_CFLAGS
+and GLIB_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See 'config.log' for more details" "$LINENO" 5; }
 else
         GLIB_CFLAGS=$pkg_cv_GLIB_CFLAGS
         GLIB_LIBS=$pkg_cv_GLIB_LIBS
@@ -12994,19 +13023,19 @@ printf "%s\n" "yes" >&6; }
 fi
 
 pkg_failed=no
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gio-2.0 >= 2.40.0" >&5
-printf %s "checking for gio-2.0 >= 2.40.0... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gio-2.0 >= 2.64" >&5
+printf %s "checking for gio-2.0 >= 2.64... " >&6; }
 
 if test -n "$GIO_CFLAGS"; then
     pkg_cv_GIO_CFLAGS="$GIO_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gio-2.0 >= 2.40.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gio-2.0 >= 2.40.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gio-2.0 >= 2.64\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gio-2.0 >= 2.64") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GIO_CFLAGS=`$PKG_CONFIG --cflags "gio-2.0 >= 2.40.0" 2>/dev/null`
+  pkg_cv_GIO_CFLAGS=`$PKG_CONFIG --cflags "gio-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13018,12 +13047,12 @@ if test -n "$GIO_LIBS"; then
     pkg_cv_GIO_LIBS="$GIO_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gio-2.0 >= 2.40.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gio-2.0 >= 2.40.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gio-2.0 >= 2.64\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gio-2.0 >= 2.64") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GIO_LIBS=`$PKG_CONFIG --libs "gio-2.0 >= 2.40.0" 2>/dev/null`
+  pkg_cv_GIO_LIBS=`$PKG_CONFIG --libs "gio-2.0 >= 2.64" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13044,14 +13073,14 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-                GIO_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gio-2.0 >= 2.40.0" 2>&1`
+                GIO_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gio-2.0 >= 2.64" 2>&1`
         else
-                GIO_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gio-2.0 >= 2.40.0" 2>&1`
+                GIO_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gio-2.0 >= 2.64" 2>&1`
         fi
         # Put the nasty error message in config.log where it belongs
         echo "$GIO_PKG_ERRORS" >&5
 
-        as_fn_error $? "Package requirements (gio-2.0 >= 2.40.0) were not met:
+        as_fn_error $? "Package requirements (gio-2.0 >= 2.64) were not met:
 
 $GIO_PKG_ERRORS
 
@@ -13085,19 +13114,19 @@ printf "%s\n" "yes" >&6; }
 fi
 
 pkg_failed=no
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gtk+-3.0 >= 3.20.0" >&5
-printf %s "checking for gtk+-3.0 >= 3.20.0... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gtk4 >= 4.0.0" >&5
+printf %s "checking for gtk4 >= 4.0.0... " >&6; }
 
 if test -n "$GTK_CFLAGS"; then
     pkg_cv_GTK_CFLAGS="$GTK_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 >= 3.20.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 >= 3.20.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk4 >= 4.0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtk4 >= 4.0.0") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTK_CFLAGS=`$PKG_CONFIG --cflags "gtk+-3.0 >= 3.20.0" 2>/dev/null`
+  pkg_cv_GTK_CFLAGS=`$PKG_CONFIG --cflags "gtk4 >= 4.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13109,12 +13138,12 @@ if test -n "$GTK_LIBS"; then
     pkg_cv_GTK_LIBS="$GTK_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 >= 3.20.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 >= 3.20.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk4 >= 4.0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "gtk4 >= 4.0.0") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTK_LIBS=`$PKG_CONFIG --libs "gtk+-3.0 >= 3.20.0" 2>/dev/null`
+  pkg_cv_GTK_LIBS=`$PKG_CONFIG --libs "gtk4 >= 4.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13135,38 +13164,18 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-                GTK_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtk+-3.0 >= 3.20.0" 2>&1`
+                GTK_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtk4 >= 4.0.0" 2>&1`
         else
-                GTK_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtk+-3.0 >= 3.20.0" 2>&1`
+                GTK_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtk4 >= 4.0.0" 2>&1`
         fi
         # Put the nasty error message in config.log where it belongs
         echo "$GTK_PKG_ERRORS" >&5
 
-        as_fn_error $? "Package requirements (gtk+-3.0 >= 3.20.0) were not met:
-
-$GTK_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables GTK_CFLAGS
-and GTK_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details." "$LINENO" 5
+        as_fn_error $? "Package requirements (gtk4) were not met. Install gtk4-devel." "$LINENO" 5
 elif test $pkg_failed = untried; then
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-        { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
-printf "%s\n" "$as_me: error: in '$ac_pwd':" >&2;}
-as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables GTK_CFLAGS
-and GTK_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See 'config.log' for more details" "$LINENO" 5; }
+        as_fn_error $? "Package requirements (gtk4) were not met. Install gtk4-devel." "$LINENO" 5
 else
         GTK_CFLAGS=$pkg_cv_GTK_CFLAGS
         GTK_LIBS=$pkg_cv_GTK_LIBS
@@ -13177,19 +13186,19 @@ fi
 
 
 pkg_failed=no
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libnm >= 1.2.0" >&5
-printf %s "checking for libnm >= 1.2.0... " >&6; }
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libnm >= 1.50.3" >&5
+printf %s "checking for libnm >= 1.50.3... " >&6; }
 
 if test -n "$NM_CFLAGS"; then
     pkg_cv_NM_CFLAGS="$NM_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnm >= 1.2.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libnm >= 1.2.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnm >= 1.50.3\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnm >= 1.50.3") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_NM_CFLAGS=`$PKG_CONFIG --cflags "libnm >= 1.2.0" 2>/dev/null`
+  pkg_cv_NM_CFLAGS=`$PKG_CONFIG --cflags "libnm >= 1.50.3" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13201,12 +13210,12 @@ if test -n "$NM_LIBS"; then
     pkg_cv_NM_LIBS="$NM_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnm >= 1.2.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libnm >= 1.2.0") 2>&5
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnm >= 1.50.3\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnm >= 1.50.3") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_NM_LIBS=`$PKG_CONFIG --libs "libnm >= 1.2.0" 2>/dev/null`
+  pkg_cv_NM_LIBS=`$PKG_CONFIG --libs "libnm >= 1.50.3" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -13227,18 +13236,18 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-                NM_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnm >= 1.2.0" 2>&1`
+                NM_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnm >= 1.50.3" 2>&1`
         else
-                NM_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnm >= 1.2.0" 2>&1`
+                NM_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnm >= 1.50.3" 2>&1`
         fi
         # Put the nasty error message in config.log where it belongs
         echo "$NM_PKG_ERRORS" >&5
 
-        as_fn_error $? "Package requirements (libnm >= 1.2.0) were not met. Install NetworkManager-libnm-devel." "$LINENO" 5
+        as_fn_error $? "Package requirements (libnm >= 1.50.3) were not met. Install NetworkManager-libnm-devel." "$LINENO" 5
 elif test $pkg_failed = untried; then
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
-        as_fn_error $? "Package requirements (libnm >= 1.2.0) were not met. Install NetworkManager-libnm-devel." "$LINENO" 5
+        as_fn_error $? "Package requirements (libnm >= 1.50.3) were not met. Install NetworkManager-libnm-devel." "$LINENO" 5
 else
         NM_CFLAGS=$pkg_cv_NM_CFLAGS
         NM_LIBS=$pkg_cv_NM_LIBS
@@ -13247,9 +13256,85 @@ printf "%s\n" "yes" >&6; }
 
 fi
 
+
 NM_UTIL_CFLAGS=$NM_CFLAGS
 NM_UTIL_LIBS=$NM_LIBS
 
+
+
+
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for libnma >= 1.10.6" >&5
+printf %s "checking for libnma >= 1.10.6... " >&6; }
+
+if test -n "$NM_UI_CFLAGS"; then
+    pkg_cv_NM_UI_CFLAGS="$NM_UI_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnma >= 1.10.6\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnma >= 1.10.6") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NM_UI_CFLAGS=`$PKG_CONFIG --cflags "libnma >= 1.10.6" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$NM_UI_LIBS"; then
+    pkg_cv_NM_UI_LIBS="$NM_UI_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libnma >= 1.10.6\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libnma >= 1.10.6") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_NM_UI_LIBS=`$PKG_CONFIG --libs "libnma >= 1.10.6" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                NM_UI_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libnma >= 1.10.6" 2>&1`
+        else
+                NM_UI_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libnma >= 1.10.6" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$NM_UI_PKG_ERRORS" >&5
+
+        as_fn_error $? "Package requirements (libnma >= 1.10.6) were not met. Install libnma-devel." "$LINENO" 5
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        as_fn_error $? "Package requirements (libnma >= 1.10.6) were not met. Install libnma-devel." "$LINENO" 5
+else
+        NM_UI_CFLAGS=$pkg_cv_NM_UI_CFLAGS
+        NM_UI_LIBS=$pkg_cv_NM_UI_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+
+fi
+
+NM_VPN_CFLAGS="-I/usr/include/libnm"
 
 
 ac_config_files="$ac_config_files Makefile src/Makefile"

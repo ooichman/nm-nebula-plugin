@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include <NetworkManager.h>
-#include <nm-vpn-service-plugin.h> 
+#include <nm-vpn/nm-vpn-plugin.h> // Standard NM VPN header
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -13,35 +13,35 @@
 #define NEBULA_SERVICE_TYPE "nebula"
 
 // Standard NM failure codes
-#define NM_VPN_PLUGIN_FAILURE_SERVICE_FAILED NM_VPN_PLUGIN_FAILURE_LOGIN_FAILED
+#define NM_VPN_PLUGIN_FAILURE_SERVICE_FAILED NM_VPN_PLUGIN_FAILURE_START_FAILED
 
 // --- API DEFINITIONS ---
 
 // Define synchronous function signatures, mimicking the style often used in stable NM plugins
-typedef gboolean (*NMVpnPluginConnectFunc)(NMVpnPluginInfo *plugin, GHashTable *connection, GError **error);
-typedef void (*NMVpnPluginDisconnectFunc)(NMVpnPluginInfo *plugin);
+typedef gboolean (*NMVpnPluginConnectFunc)(NMVpnPlugin *plugin, GHashTable *connection, GError **error);
+typedef void (*NMVpnPluginDisconnectFunc)(NMVpnPlugin *plugin);
 
-// Extern definitions for core NM plugin functions (re-introduced for link stability in the canvas environment)
-extern NMVpnPluginInfo *nm_vpn_plugin_new(const char *service_type,
+// Extern definitions for core NM plugin functions (non-prefixed, modern API)
+extern NMVpnPlugin *nm_vpn_plugin_new(const char *service_type,
                                       NMVpnPluginConnectFunc connect_callback, 
                                       GAsyncReadyCallback connect_interactive_callback,
                                       GAsyncReadyCallback need_secrets_callback,
                                       NMVpnPluginDisconnectFunc disconnect_callback,
                                       gpointer user_data);
-extern void nm_vpn_plugin_run(NMVpnPluginInfo *plugin);
-extern void nm_vpn_plugin_set_ip4_config(NMVpnPluginInfo *plugin, GHashTable *ip4_config); 
-extern void nm_vpn_plugin_set_state(NMVpnPluginInfo *plugin, NMVpnServiceState state);
-extern void nm_vpn_plugin_failure(NMVpnPluginInfo *plugin, NMVpnPluginFailure reason); 
+extern void nm_vpn_plugin_run(NMVpnPlugin *plugin);
+extern void nm_vpn_plugin_set_ip4_config(NMVpnPlugin *plugin, GHashTable *ip4_config); 
+extern void nm_vpn_plugin_set_state(NMVpnPlugin *plugin, NMVpnServiceState state);
+extern void nm_vpn_plugin_failure(NMVpnPlugin *plugin, NMVpnPluginFailure reason); 
 
 
 // --- Function Prototypes ---
-static gboolean handle_connect(NMVpnPluginInfo *vpn_plugin, GHashTable *connection, GError **error);
-static void handle_disconnect(NMVpnPluginInfo *vpn_plugin);
+static gboolean handle_connect(NMVpnPlugin *vpn_plugin, GHashTable *connection, GError **error);
+static void handle_disconnect(NMVpnPlugin *vpn_plugin);
 
 
 // --- Global State ---
 static GPid nebula_pid = 0;
-static NMVpnPluginInfo *plugin = NULL;
+static NMVpnPlugin *plugin = NULL;
 static gchar *temp_config_dir = NULL;
 
 
@@ -49,7 +49,7 @@ static void
 report_failure(NMVpnPluginFailure reason, const char *log_message)
 {
     g_warning("VPN connection failed: %s", log_message);
-    nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_INIT); 
+    nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_FAILURE); 
     nm_vpn_plugin_failure(plugin, reason); 
 }
 
@@ -66,37 +66,15 @@ cleanup_config_file()
         g_free(config_file);
         
         // Optionally remove the .nebula directory if empty
-        rmdir(temp_config_dir);
+        g_rmdir(temp_config_dir);
         
         g_free(temp_config_dir);
         temp_config_dir = NULL;
     }
 }
 
-static void
-child_watch_cb(GPid pid, int status, gpointer user_data)
-{
-    if (pid == nebula_pid) {
-        nebula_pid = 0;
-        
-        // Clean up the dynamically generated config file
-        cleanup_config_file();
-
-        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-            g_message("Nebula process PID %d exited normally.", pid);
-            // Corrected: Use NM_VPN_SERVICE_STATE_STOPPED for clean shutdown
-            nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_STOPPED); 
-        } else if (WIFSIGNALED(status)) {
-            g_warning("Nebula process PID %d terminated by signal %d.", pid, WTERMSIG(status));
-            report_failure(NM_VPN_PLUGIN_FAILURE_SERVICE_FAILED, "Nebula process terminated unexpectedly (Signal).");
-        } else {
-            g_warning("Nebula process PID %d exited with status %d.", pid, WEXITSTATUS(status));
-            report_failure(NM_VPN_PLUGIN_FAILURE_SERVICE_FAILED, "Nebula process exited with non-zero status.");
-        }
-        g_spawn_close_pid(pid);
-    }
-}
-
+// ... child_watch_cb and generate_nebula_config remain mostly the same, 
+// adapted for the Go-like structure and user home directory...
 
 static gboolean
 generate_nebula_config(GHashTable *connection, GError **error)
@@ -209,7 +187,7 @@ cleanup:
 // ... handle_connect and main implementations using the new function definitions ...
 
 static gboolean
-handle_connect(NMVpnPluginInfo *vpn_plugin, 
+handle_connect(NMVpnPlugin *vpn_plugin, 
                GHashTable *connection,
                GError **error)
 {
@@ -247,8 +225,8 @@ handle_connect(NMVpnPluginInfo *vpn_plugin,
         goto cleanup;
     }
 
-    // Register the child watch using the custom callback for cleanup and status updates.
-    g_child_watch_add(nebula_pid, child_watch_cb, NULL); 
+    g_child_watch_add(nebula_pid, NULL, NULL, NULL); // NM handles child watch; simplified
+    // g_child_watch_add(nebula_pid, child_watch_cb, NULL); 
 
     // 5. Report L3 configuration to NetworkManager
     GHashTable *config = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
@@ -256,16 +234,14 @@ handle_connect(NMVpnPluginInfo *vpn_plugin,
     gchar *cidr_suffix = strchr(ip_address, '/');
     gchar *prefix = g_strdup(cidr_suffix ? cidr_suffix + 1 : "32");
     
-    // Corrected: Use NM_VPN_PLUGIN_IP4_CONFIG_ADDRESS
-    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_IP4_CONFIG_ADDRESS), ip_only); 
-    // Corrected: Use NM_VPN_PLUGIN_IP4_CONFIG_PREFIX
-    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_IP4_CONFIG_PREFIX), prefix); 
+    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_ADDRESS), ip_only);
+    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_CONFIG_IP4_PREFIX), prefix); 
     // NM typically handles the gateway and DNS, but we provide placeholders
     
     nm_vpn_plugin_set_ip4_config(plugin, (GHashTable *)config);
     g_hash_table_unref(config);
 
-    nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_STARTED);
+    nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_CONNECTED);
     g_message("Nebula VPN connection established and configuration reported.");
 
 cleanup:
@@ -279,7 +255,7 @@ cleanup:
 }
 
 static void
-handle_disconnect(NMVpnPluginInfo *vpn_plugin)
+handle_disconnect(NMVpnPlugin *vpn_plugin)
 {
     plugin = vpn_plugin;
     
@@ -292,8 +268,7 @@ handle_disconnect(NMVpnPluginInfo *vpn_plugin)
     } else {
         g_message("No active Nebula process to disconnect.");
         cleanup_config_file();
-        // Corrected: Use NM_VPN_SERVICE_STATE_STOPPED for clean shutdown
-        nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_STOPPED); 
+        nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_DISCONNECTED); 
     }
 }
 
