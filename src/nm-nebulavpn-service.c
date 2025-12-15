@@ -21,7 +21,7 @@
 typedef gboolean (*NMVpnPluginConnectFunc)(NMVpnPluginInfo *plugin, GHashTable *connection, GError **error);
 typedef void (*NMVpnPluginDisconnectFunc)(NMVpnPluginInfo *plugin);
 
-// Extern definitions for core NM plugin functions (non-prefixed, modern API)
+// Extern definitions for core NM plugin functions (re-introduced for link stability in the canvas environment)
 extern NMVpnPluginInfo *nm_vpn_plugin_new(const char *service_type,
                                       NMVpnPluginConnectFunc connect_callback, 
                                       GAsyncReadyCallback connect_interactive_callback,
@@ -84,7 +84,8 @@ child_watch_cb(GPid pid, int status, gpointer user_data)
 
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
             g_message("Nebula process PID %d exited normally.", pid);
-            nm_vpn_plugin_set_state(plugin, NM_DEVICE_STATE_DISCONNECTED); 
+            // Corrected: Use NM_VPN_SERVICE_STATE_STOPPED for clean shutdown
+            nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_STOPPED); 
         } else if (WIFSIGNALED(status)) {
             g_warning("Nebula process PID %d terminated by signal %d.", pid, WTERMSIG(status));
             report_failure(NM_VPN_PLUGIN_FAILURE_SERVICE_FAILED, "Nebula process terminated unexpectedly (Signal).");
@@ -255,7 +256,9 @@ handle_connect(NMVpnPluginInfo *vpn_plugin,
     gchar *cidr_suffix = strchr(ip_address, '/');
     gchar *prefix = g_strdup(cidr_suffix ? cidr_suffix + 1 : "32");
     
-    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_IP4_CONFIG_ADDRESS), ip_only);
+    // Corrected: Use NM_VPN_PLUGIN_IP4_CONFIG_ADDRESS
+    g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_IP4_CONFIG_ADDRESS), ip_only); 
+    // Corrected: Use NM_VPN_PLUGIN_IP4_CONFIG_PREFIX
     g_hash_table_insert(config, g_strdup(NM_VPN_PLUGIN_IP4_CONFIG_PREFIX), prefix); 
     // NM typically handles the gateway and DNS, but we provide placeholders
     
@@ -289,7 +292,8 @@ handle_disconnect(NMVpnPluginInfo *vpn_plugin)
     } else {
         g_message("No active Nebula process to disconnect.");
         cleanup_config_file();
-        nm_vpn_plugin_set_state(plugin, NM_DEVICE_STATE_DISCONNECTED); 
+        // Corrected: Use NM_VPN_SERVICE_STATE_STOPPED for clean shutdown
+        nm_vpn_plugin_set_state(plugin, NM_VPN_SERVICE_STATE_STOPPED); 
     }
 }
 
